@@ -23,6 +23,8 @@ def load_olympic_data():
     return dataset['train'].to_pandas()
 
 # Load Demographic data using Census API and return it as a pandas dataframe
+
+
 def load_demographic_data():
 
     response = requests.get(BASE_URL, params=params)
@@ -41,6 +43,3 @@ def load_demographic_data():
     ###### Need to rename these variables to understadable names #####
 
     return df
-
-data = load_demographic_data()
-print(data.head(10))
