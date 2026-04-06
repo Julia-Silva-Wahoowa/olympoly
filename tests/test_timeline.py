@@ -1,47 +1,55 @@
 # test_timeline.py
-"""
-Pytest tests for olympics_data.timeline module.
-"""
 
 import pandas as pd
 import pytest
-from olympoly.timeline import timeline 
 
-# Load the dataset (for faster testing, you could use a small CSV sample)
-df = pd.read_csv("athlete_events.csv")
-
-
-def test_participation_trends():
-    """
-    Test participation_trends function
-    """
-    result = timeline.participation_trends(df, by_gender=True, plot=False)
-    
-    # Basic checks
-    assert not result.empty, "Participation trends returned empty DataFrame"
-    assert any(gender in result.columns for gender in ['M', 'F']), "Gender columns missing"
-    assert result.index.is_monotonic_increasing, "Years are not sorted properly"
+from olympoly.timeline import (
+    participation_trends,
+    medal_trends,
+    sport_popularity
+)
 
 
-def test_medal_trends():
-    """
-    Test medal_trends function
-    """
-    result = timeline.medal_trends(df, entity="Team", top_n=5, plot=False)
-    
-    # Basic checks
-    assert not result.empty, "Medal trends returned empty DataFrame"
-    assert result.index.is_monotonic_increasing, "Years are not sorted properly"
-    assert result.shape[1] <= 5, "More than top_n columns returned"
+# -------------------------
+# Fixture (replaces CSV)
+# -------------------------
+
+@pytest.fixture
+def sample_df():
+    """Small sample Olympics dataset"""
+    return pd.DataFrame({
+        "ID": [1, 2, 3, 4, 1, 2],
+        "Gender": ["M", "F", "M", "F", "M", "F"],
+        "Team": ["USA", "USA", "CAN", "CAN", "USA", "USA"],
+        "Sport": ["Swimming", "Running", "Running", "Swimming", "Swimming", "Running"],
+        "Medal": ["Gold", None, "Silver", None, "Gold", "Bronze"],
+        "Year": [2000, 2000, 2004, 2004, 2008, 2008]
+    })
 
 
-def test_sport_popularity():
-    """
-    Test sport_popularity function
-    """
-    result = timeline.sport_popularity(df, plot=False)
-    
-    # Basic checks
-    assert not result.empty, "Sport popularity returned empty DataFrame"
-    assert result.index.is_monotonic_increasing, "Years are not sorted properly"
-    assert result.shape[1] > 0, "No sports found in the data"
+# -------------------------
+# Tests
+# -------------------------
+
+def test_participation_trends(sample_df):
+    result = participation_trends(sample_df, by_gender=True, plot=False)
+
+    assert not result.empty
+    assert result.index.is_monotonic_increasing
+    assert any(col in result.columns for col in ["M", "F"])
+
+
+def test_medal_trends(sample_df):
+    result = medal_trends(sample_df, entity="Team", top_n=2, plot=False)
+
+    assert not result.empty
+    assert result.index.is_monotonic_increasing
+    assert result.shape[1] <= 2
+
+
+def test_sport_popularity(sample_df):
+    result = sport_popularity(sample_df, plot=False)
+
+    assert not result.empty
+    assert result.index.is_monotonic_increasing
+    assert result.shape[1] > 0
