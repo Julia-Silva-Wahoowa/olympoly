@@ -4,6 +4,7 @@ import pytest
 
 from olympoly.performance import prepare_data, country_efficiency, efficiency_trends
 
+
 # -------------------------
 # Fixtures
 # -------------------------
@@ -23,14 +24,16 @@ def sample_data(monkeypatch):
             'Sport': ['Swimming', 'Swimming', 'Gymnastics', 'Gymnastics', 'Gymnastics', 'Athletics']
         })
 
-    monkeypatch.setattr("package_name.performance.load_data", mock_load_data)
+    # ✅ FIXED monkeypatch path
+    monkeypatch.setattr("olympoly.performance.load_data", mock_load_data)
+
     return mock_load_data()
 
 
 # -------------------------
 # Tests for prepare_data
 # -------------------------
-def test_prepare_data_types(sample_data, monkeypatch):
+def test_prepare_data_types(sample_data):
     df = prepare_data()
 
     assert pd.api.types.is_numeric_dtype(df['Year'])
@@ -67,7 +70,6 @@ def test_country_efficiency_calculation(sample_data):
     usa_eff = result.loc['USA', 'Efficiency']
     china_eff = result.loc['China', 'Efficiency']
 
-    # Manual calculation:
     # USA: 3 athletes, 2 medals → 2/3
     # China: 3 athletes, 2 medals → 2/3
     assert np.isclose(usa_eff, 2/3)
