@@ -43,3 +43,7 @@ def load_demographic_data():
     ###### Need to rename these variables to understadable names #####
 
     return df
+
+if __name__ == "__main__":
+    data = load_demographic_data()
+    print(data.head(10))
