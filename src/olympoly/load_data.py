@@ -1,11 +1,17 @@
 from urllib import response
 from datasets import load_dataset
+import os
+from dotenv import load_dotenv
 import pandas as pd
 import requests
 
-# Settings to fetch Demographic Data of Countries using Census API
+load_dotenv()  # loads the .env file
 
-API_KEY = "TYPE KEY HERE"
+api_key = os.getenv("API_KEY")
+
+# Settings to fetch Demographic Data of Countries using Census API
+API_KEY = api_key
+
 BASE_URL = "https://api.census.gov/data/timeseries/idb/5year"
 
 params = {
