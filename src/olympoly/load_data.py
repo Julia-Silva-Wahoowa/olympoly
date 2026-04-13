@@ -49,6 +49,12 @@ def load_demographic_data():
 
     return df
 
+def load_data():
+    """
+    Wrapper function for compatibility with other modules.
+    """
+    return load_olympic_data()
+
 if __name__ == "__main__":
     data = load_demographic_data()
     print(data.head(10))
