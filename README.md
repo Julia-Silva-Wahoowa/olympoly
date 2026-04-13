@@ -11,7 +11,7 @@
 The core objective of `olympoly` is to determine if historical data can "out-predict" public sentiment. By leveraging over a century of Olympic datasets and modern machine learning baselines, the tool flags instances where the market's implied probability (the odds) deviates significantly from statistical reality.
 
 ### Key Features
-
+# making a comment to see if my commit actually works
 - **Time Series Analysis:** Analyze trends regarding athlete participation, medal counts, and sport popularity.
 - **Polymarket Simulation:** Simulates Olympics sport betting via Polymarket using simulated data.
 
