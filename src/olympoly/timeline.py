@@ -27,12 +27,18 @@ def participation_trends(df, by_gender=True, plot=True):
     Returns:
     - trends: pandas.DataFrame with counts of unique athletes per year (and gender if by_gender)
     """
+# Support both 'Sex' and 'Gender' column names for compatibility
+gender_col = 'Sex' if 'Sex' in df.columns else 'Gender' if 'Gender' in df.columns else None
+
     if by_gender:
-        trends = df.groupby(['Year', 'Gender'])['ID'].nunique().reset_index()
-        trends = trends.pivot(index='Year', columns='Gender', values='ID').fillna(0)
+        if gender_col is None:
+            raise ValueError("DataFrame must contain a 'Sex' or 'Gender' column for by_gender=True")
+        trends = df.groupby(['Year', gender_col])['ID'].nunique().reset_index()
+        trends = trends.pivot(index='Year', columns=gender_col, values='ID').fillna(0)
     else:
         trends = df.groupby('Year')['ID'].nunique().reset_index()
         trends.rename(columns={'ID': 'Count'}, inplace=True)
+        trends = trends.set_index('Year')
 
     if plot:
         trends.plot(figsize=(12, 6), marker='o')
