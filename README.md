@@ -24,5 +24,5 @@ To set up the environment and explore the analysis, clone the repository and ins
 ```bash
 git clone https://github.com/caleb-adhikari/olympoly.git
 cd olympoly
-pip install .
+python -m pip install -e ".[dev]"
 ```
