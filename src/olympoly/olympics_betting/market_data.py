@@ -84,3 +84,188 @@ def get_latest_prices(df):
     """
     idx = df.groupby(["event", "outcome"])["timestamp"].idxmax()
     return df.loc[idx].reset_index(drop=True)
+
+
+from __future__ import annotations
+
+from typing import Any
+import requests
+import pandas as pd
+
+GAMMA_BASE_URL = "https://gamma-api.polymarket.com"
+
+
+class PolymarketAPIError(RuntimeError):
+    """Raised when a Polymarket API request fails."""
+
+
+def _get_json(path: str, params: dict[str, Any] | None = None) -> Any:
+    url = f"{GAMMA_BASE_URL}{path}"
+    try:
+        response = requests.get(url, params=params, timeout=20)
+        response.raise_for_status()
+        return response.json()
+    except requests.RequestException as exc:
+        raise PolymarketAPIError(f"Request to {url} failed: {exc}") from exc
+
+
+def search_polymarket(query: str) -> pd.DataFrame:
+    """
+    Search Polymarket for matching events/markets and return a DataFrame.
+    """
+    data = _get_json("/public-search", params={"q": query})
+
+    if isinstance(data, dict):
+        for key in ("results", "data", "events", "markets"):
+            if key in data and isinstance(data[key], list):
+                return pd.DataFrame(data[key])
+
+    if isinstance(data, list):
+        return pd.DataFrame(data)
+
+    return pd.DataFrame()
+
+
+def fetch_active_events(limit: int = 200, offset: int = 0) -> pd.DataFrame:
+    """
+    Fetch active Polymarket events.
+    """
+    data = _get_json(
+        "/events",
+        params={
+            "active": "true",
+            "closed": "false",
+            "limit": limit,
+            "offset": offset,
+        },
+    )
+
+    if isinstance(data, list):
+        return pd.DataFrame(data)
+
+    if isinstance(data, dict):
+        for key in ("events", "data", "results"):
+            if key in data and isinstance(data[key], list):
+                return pd.DataFrame(data[key])
+
+    return pd.DataFrame()
+
+
+def _safe_float(value: Any) -> float | None:
+    """
+    Convert API values to float when possible.
+    """
+    if value is None:
+        return None
+
+    if isinstance(value, (int, float)):
+        return float(value)
+
+    if isinstance(value, str):
+        try:
+            return float(value)
+        except ValueError:
+            return None
+
+    return None
+
+
+def extract_market_odds(events_df: pd.DataFrame, query: str) -> pd.DataFrame:
+    """
+    Filter active events to the user's query and return tidy odds data.
+    """
+    columns = [
+        "event_title",
+        "market_question",
+        "yes_price",
+        "no_price",
+        "yes_percent",
+        "no_percent",
+        "slug",
+    ]
+
+    if events_df.empty:
+        return pd.DataFrame(columns=columns)
+
+    rows: list[dict[str, Any]] = []
+    query_lower = query.lower().strip()
+
+    for _, event_row in events_df.iterrows():
+        event_title = str(
+            event_row.get("title")
+            or event_row.get("name")
+            or event_row.get("slug")
+            or ""
+        )
+
+        markets = event_row.get("markets") or event_row.get("Markets") or []
+        event_matches = query_lower in event_title.lower()
+
+        if not isinstance(markets, list):
+            continue
+
+        for market in markets:
+            if not isinstance(market, dict):
+                continue
+
+            question = str(
+                market.get("question")
+                or market.get("title")
+                or market.get("name")
+                or ""
+            )
+            slug = market.get("slug")
+
+            if not event_matches and query_lower not in question.lower():
+                continue
+
+            # Try common Gamma fields
+            yes_price = _safe_float(
+                market.get("bestAsk")
+                or market.get("price")
+                or market.get("lastTradePrice")
+            )
+            no_price = _safe_float(market.get("bestBid"))
+
+            # If outcomePrices exists, try to use it
+            outcome_prices = market.get("outcomePrices")
+            if yes_price is None and isinstance(outcome_prices, list) and len(outcome_prices) >= 1:
+                yes_price = _safe_float(outcome_prices[0])
+            if no_price is None and isinstance(outcome_prices, list) and len(outcome_prices) >= 2:
+                no_price = _safe_float(outcome_prices[1])
+
+            rows.append(
+                {
+                    "event_title": event_title,
+                    "market_question": question,
+                    "yes_price": yes_price,
+                    "no_price": no_price,
+                    "yes_percent": round(yes_price * 100, 2) if yes_price is not None else None,
+                    "no_percent": round(no_price * 100, 2) if no_price is not None else None,
+                    "slug": slug,
+                }
+            )
+
+    if not rows:
+        return pd.DataFrame(columns=columns)
+
+    return pd.DataFrame(rows).sort_values(
+        by=["event_title", "market_question"]
+    ).reset_index(drop=True)
+
+
+def get_current_odds_for_event(query: str, limit: int = 200) -> pd.DataFrame:
+    """
+    Main function:
+    1. fetch active Polymarket events
+    2. filter by user query
+    3. return a tidy DataFrame
+    """
+    events_df = fetch_active_events(limit=limit)
+    odds_df = extract_market_odds(events_df, query=query)
+
+    if not odds_df.empty:
+        return odds_df
+
+    # Fallback: raw search results
+    return search_polymarket(query)
