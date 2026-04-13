@@ -32,3 +32,30 @@ def explore():
 # Run the function when the script is executed directly
 if __name__ == "__main__":
     explore()
+
+
+    
+    from __future__ import annotations
+
+from olympoly.olympics_betting.market_data import get_current_odds_for_event
+
+
+def main() -> None:
+    event = input("Enter sporting event: ").strip()
+
+    if not event:
+        print("Please enter an event name.")
+        return
+
+    df = get_current_odds_for_event(event)
+
+    if df.empty:
+        print("No matching Polymarket markets found.")
+        return
+
+    print("\nCurrent results:\n")
+    print(df.to_string(index=False))
+
+
+if __name__ == "__main__":
+    main()
