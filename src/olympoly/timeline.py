@@ -27,6 +27,7 @@ def participation_trends(df, by_gender=True, plot=True):
     Returns:
     - trends: pandas.DataFrame with counts of unique athletes per year (and gender if by_gender)
     """
+    
 # Support both 'Sex' and 'Gender' column names for compatibility
 gender_col = 'Sex' if 'Sex' in df.columns else 'Gender' if 'Gender' in df.columns else None
 
