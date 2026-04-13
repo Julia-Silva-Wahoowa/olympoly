@@ -1,4 +1,3 @@
-from urllib import response
 from datasets import load_dataset
 import os
 from dotenv import load_dotenv
