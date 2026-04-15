@@ -3,7 +3,7 @@
 import pandas as pd
 import pytest
 
-from olympoly.simulation import simulate_market_strategy, simulate_edge_strategy
+from olympoly.olympics_betting.simulation import simulate_market_strategy, simulate_edge_strategy
 
 
 # -------------------------
