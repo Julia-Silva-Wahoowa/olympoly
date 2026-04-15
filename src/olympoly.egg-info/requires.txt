@@ -1,9 +1,0 @@
-datasets>=4.8.4
-numpy>=2.0
-pandas>=2.2
-
-[dev]
-pytest
-jupyter
-matplotlib
-ruff
