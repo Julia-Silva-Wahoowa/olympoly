@@ -249,9 +249,13 @@ def build_event_country_probs(df: pd.DataFrame, schema: Schema, bp: BuildParams)
             "Pass --medal_col or --rank_col."
         )
 
-    # Create a boolean win indicator per row
-    df["is_gold"] = df.apply(lambda r: is_gold_row(r, schema.medal_col, schema.rank_col), axis=1)
-    winners = df[df["is_gold"]].copy()
+    # Create a boolean win indicator per row (vectorized for speed)
+    if schema.medal_col and schema.medal_col in df.columns:
+        df["is_gold"] = df[schema.medal_col].astype(str).str.strip().str.lower().isin(["gold", "g"])
+    elif schema.rank_col and schema.rank_col in df.columns:
+        df["is_gold"] = pd.to_numeric(df[schema.rank_col], errors="coerce") == 1
+    else:
+        df["is_gold"] = False
 
     if winners.empty:
         raise ValueError(
