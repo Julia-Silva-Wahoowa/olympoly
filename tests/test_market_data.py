@@ -4,6 +4,7 @@ import pandas as pd
 import pytest
 
 from olympoly.olympics_betting.market_data import (
+    load_market_data,
     validate_market_data,
     normalize_prices,
     merge_market_data,
