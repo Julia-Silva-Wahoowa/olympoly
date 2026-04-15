@@ -3,6 +3,7 @@ import os
 from dotenv import load_dotenv
 import pandas as pd
 import requests
+from pathlib import Path
 
 load_dotenv()  # loads the .env file
 
@@ -49,6 +50,13 @@ def load_demographic_data():
 
     return df
 
+# Load data of a list of host countries 
+
+def load_host_data():
+    BASE_DIR = Path(__file__).resolve().parent
+    df = pd.read_csv(BASE_DIR / "Host_Countries.csv")
+    return df
+
 def load_data():
     """
     Wrapper function for compatibility with other modules.
@@ -56,5 +64,5 @@ def load_data():
     return load_olympic_data()
 
 if __name__ == "__main__":
-    data = load_demographic_data()
+    data = load_host_data()
     print(data.head(10))
