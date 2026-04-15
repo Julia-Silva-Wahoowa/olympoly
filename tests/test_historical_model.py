@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 import pytest
 
-from olympoly.historical_model import (
+from olympoly.olympics_betting.historical_model import (
     country_medal_probability,
     country_gold_probability,
     sport_medal_probability,
