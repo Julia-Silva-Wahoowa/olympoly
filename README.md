@@ -26,3 +26,4 @@ git clone https://github.com/caleb-adhikari/olympoly.git
 cd olympoly
 python -m pip install -e ".[dev]"
 ```
+
