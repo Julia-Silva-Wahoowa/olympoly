@@ -93,3 +93,43 @@ def test_sport_popularity(sample_df):
     assert not result.empty
     assert result.index.is_monotonic_increasing
     assert result.shape[1] > 0
+    
+    
+def test_participation_trends_missing_gender():
+    """
+    Ensure participation_trends raises ValueError when by_gender=True
+    but no gender column exists.
+    """
+    df = pd.DataFrame({
+        "ID": [1, 2],
+        "Year": [2000, 2004]
+    })
+
+    with pytest.raises(ValueError):
+        participation_trends(df, by_gender=True, plot=False)
+        
+def test_timeline_no_plot(sample_df):
+   
+    """
+    Ensure timeline functions do not error when plot=False.
+    """
+    
+    participation_trends(sample_df, plot=False)
+    medal_trends(sample_df, plot=False)
+    sport_popularity(sample_df, plot=False)
+    
+def test_participation_unique_ids():
+    
+    """
+    Ensure participation counts unique athletes, not duplicate rows.
+    """
+    
+    df = pd.DataFrame({
+        "ID": [1, 1, 2],
+        "Gender": ["M", "M", "F"],
+        "Year": [2000, 2000, 2000]
+    })
+
+    result = participation_trends(df, by_gender=False, plot=False)
+
+    assert result.loc[2000, 'Count'] == 2

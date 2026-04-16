@@ -186,3 +186,34 @@ def test_plot_probability_distribution_missing_columns():
 
     with pytest.raises(ValueError):
         plot_probability_distribution(df)
+        
+def test_plot_price_over_time_missing_price_column():
+    """
+    Ensure plot_price_over_time fails when 'price' column is missing.
+    """
+    
+    df = pd.DataFrame({
+        "event": ["100m"],
+        "outcome": ["USA"],
+        "timestamp": pd.to_datetime(["2024-07-01"])
+    })
+
+    with pytest.raises(KeyError):
+        plot_price_over_time(df, "100m")
+        
+def test_plot_market_comparison_empty_event():
+   
+    """
+    Ensure plot_market_comparison raises ValueError for missing event.
+    """
+    
+    df = pd.DataFrame({
+        "market": ["kalshi"],
+        "event": ["A"],
+        "outcome": ["X"],
+        "price": [0.5],
+        "timestamp": pd.to_datetime(["2024-01-01"])
+    })
+
+    with pytest.raises(ValueError):
+        plot_market_comparison(df, "nonexistent")

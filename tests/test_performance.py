@@ -194,3 +194,77 @@ def test_efficiency_trends_no_country(sample_data):
     trends = efficiency_trends(df, country="Nonexistent", plot=False)
 
     assert trends.empty or (trends['Efficiency'] == 0).all()
+    
+    
+def test_country_efficiency_zero_athletes():
+    
+    """
+    Ensure efficiency calculation handles division-by-zero safely.
+
+    Countries with zero athletes should not produce NaN or inf values.
+    """
+    
+    df = pd.DataFrame({
+        'ID': [],
+        'Team': [],
+        'Year': [],
+        'Medal': []
+    })
+
+    result = country_efficiency(df, min_athletes=0, plot=False)
+
+    assert result.empty or (result['Efficiency'] == 0).all()
+    
+    
+def test_efficiency_trends_empty_df():
+    
+    """
+    Ensure efficiency_trends handles empty input without crashing.
+    """
+    df = pd.DataFrame(columns=['ID', 'Team', 'Year', 'Medal'])
+
+    trends = efficiency_trends(df, country="USA", plot=False)
+
+    assert trends.empty
+    
+def test_country_efficiency_sorted(sample_data):
+    
+    """
+    Ensure countries are sorted in descending order of efficiency.
+    """
+    df = prepare_data()
+
+    result = country_efficiency(df, min_athletes=1, plot=False)
+
+    efficiencies = result['Efficiency'].values
+
+    assert all(efficiencies[i] >= efficiencies[i+1] for i in range(len(efficiencies)-1))
+    
+def test_no_plot_flag(sample_data):
+    
+    """
+    Ensure functions run without plotting when plot=False.
+    """
+    
+    df = prepare_data()
+
+    country_efficiency(df, plot=False)
+    efficiency_trends(df, country="USA", plot=False)
+    
+def test_unique_athlete_count():
+    
+    """
+    Ensure athletes are counted uniquely by ID, not by row count.
+    """
+    
+    df = pd.DataFrame({
+        'ID': [1, 1, 2, 2],  # duplicates
+        'Team': ['USA', 'USA', 'USA', 'USA'],
+        'Year': [2000, 2000, 2000, 2000],
+        'Medal': ['Gold', 'Gold', None, None]
+    })
+
+    result = country_efficiency(df, min_athletes=1, plot=False)
+
+    # Unique athletes = 2, medals = 2 → efficiency = 1.0
+    assert np.isclose(result.loc['USA', 'Efficiency'], 1.0)
