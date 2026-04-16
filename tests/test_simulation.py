@@ -12,7 +12,18 @@ from olympoly.simulation import simulate_market_strategy, simulate_edge_strategy
 
 @pytest.fixture
 def sample_df():
-    """Sample dataset for simulation tests"""
+    
+    """
+    Sample dataset for simulation tests
+    
+    Includes:
+    - Multiple events
+    - Varying market vs model probabilities
+    - Both positive and negative edges
+
+    Designed to trigger betting decisions under default parameters.
+    """
+    
     return pd.DataFrame({
         "event": ["A", "B", "C", "D"],
         "price": [0.4, 0.6, 0.5, 0.7],
@@ -25,6 +36,15 @@ def sample_df():
 # -------------------------
 
 def test_simulate_market_strategy_runs(sample_df):
+    
+    """
+    Ensure simulate_market_strategy executes without errors.
+
+    Verifies:
+    - Function runs end-to-end
+    - Returns correct types (DataFrame, dict)
+    """
+    
     results, summary = simulate_market_strategy(sample_df)
 
     assert isinstance(results, pd.DataFrame)
@@ -32,6 +52,15 @@ def test_simulate_market_strategy_runs(sample_df):
 
 
 def test_simulate_market_strategy_columns(sample_df):
+   
+    """
+    Validate structure of results DataFrame.
+
+    Ensures:
+    - All expected columns are present when bets occur
+    - Output schema matches simulation design
+    """
+    
     results, _ = simulate_market_strategy(sample_df)
 
     if not results.empty:
@@ -43,6 +72,18 @@ def test_simulate_market_strategy_columns(sample_df):
 
 
 def test_simulate_market_strategy_summary(sample_df):
+    
+    """
+    Validate contents of summary output.
+
+    Ensures summary includes:
+    - final_bankroll
+    - total_return
+    - roi
+    - num_bets
+    - win_rate
+    """
+    
     _, summary = simulate_market_strategy(sample_df)
 
     assert "final_bankroll" in summary
@@ -53,6 +94,16 @@ def test_simulate_market_strategy_summary(sample_df):
 
 
 def test_simulate_market_strategy_edge_filter(sample_df):
+    
+    """
+    Ensure edge_threshold correctly filters out bets.
+
+    With a very high threshold:
+    - No bets should be placed
+    - Results DataFrame should be empty
+    - num_bets should be zero
+    """
+    
     # No bets should occur
     results, summary = simulate_market_strategy(sample_df, edge_threshold=1.0)
 
@@ -61,6 +112,14 @@ def test_simulate_market_strategy_edge_filter(sample_df):
 
 
 def test_simulate_market_strategy_missing_columns(sample_df):
+    
+    """
+    Ensure function raises ValueError when required columns are missing.
+
+    Specifically tests:
+    - Missing market probability column ('price')
+    """
+    
     bad_df = sample_df.drop(columns=["price"])
 
     with pytest.raises(ValueError):
@@ -72,12 +131,29 @@ def test_simulate_market_strategy_missing_columns(sample_df):
 # -------------------------
 
 def test_simulate_edge_strategy_runs(sample_df):
+    
+    """
+    Ensure simulate_edge_strategy executes without errors.
+
+    Verifies:
+    - Function returns a dictionary
+    - No runtime issues occur
+    """
+    
     result = simulate_edge_strategy(sample_df)
 
     assert isinstance(result, dict)
 
 
 def test_simulate_edge_strategy_keys(sample_df):
+    
+    """
+    Validate output structure of edge strategy.
+
+    Ensures:
+    - 'accuracy' and 'total_bets' keys are present
+    """
+    
     result = simulate_edge_strategy(sample_df)
 
     assert "accuracy" in result
@@ -85,6 +161,16 @@ def test_simulate_edge_strategy_keys(sample_df):
 
 
 def test_simulate_edge_strategy_threshold(sample_df):
+    
+    """
+    Ensure threshold filtering works correctly.
+
+    With a high threshold:
+    - No bets should be evaluated
+    - total_bets should be zero
+    - accuracy should default to zero
+    """
+    
     result = simulate_edge_strategy(sample_df, threshold=1.0)
 
     assert result["total_bets"] == 0

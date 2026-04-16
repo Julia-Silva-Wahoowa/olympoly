@@ -16,7 +16,17 @@ from olympoly.timeline import (
 
 @pytest.fixture
 def sample_df():
-    """Small sample Olympics dataset"""
+    
+    """
+    Provides a small synthetic Olympics dataset for timeline analysis.
+
+    Includes:
+    - Multiple years
+    - Multiple teams and sports
+    - Mixed medal outcomes
+    - Gender variation for grouping tests
+    """
+    
     return pd.DataFrame({
         "ID": [1, 2, 3, 4, 1, 2],
         "Gender": ["M", "F", "M", "F", "M", "F"],
@@ -32,6 +42,16 @@ def sample_df():
 # -------------------------
 
 def test_participation_trends(sample_df):
+    
+    """
+    Test participation_trends with gender breakdown enabled.
+
+    Ensures:
+    - Output is not empty
+    - Years are sorted in increasing order
+    - Gender columns (M/F) are present
+    """
+    
     result = participation_trends(sample_df, by_gender=True, plot=False)
 
     assert not result.empty
@@ -40,6 +60,16 @@ def test_participation_trends(sample_df):
 
 
 def test_medal_trends(sample_df):
+    
+    """
+    Test medal_trends with team-level aggregation.
+
+    Ensures:
+    - Output is not empty
+    - Years are sorted in increasing order
+    - Number of columns is limited to top_n
+    """
+    
     result = medal_trends(sample_df, entity="Team", top_n=2, plot=False)
 
     assert not result.empty
@@ -48,6 +78,16 @@ def test_medal_trends(sample_df):
 
 
 def test_sport_popularity(sample_df):
+    
+    """
+    Test sport_popularity aggregation.
+
+    Ensures:
+    - Output is non-empty
+    - Years are sorted
+    - At least one sport column exists
+    """
+    
     result = sport_popularity(sample_df, plot=False)
 
     assert not result.empty
