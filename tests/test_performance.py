@@ -3,6 +3,7 @@ import numpy as np
 import pytest
 
 from olympoly.performance import prepare_data, country_efficiency, efficiency_trends
+from dotenv import load_dotenv
 
 
 # -------------------------

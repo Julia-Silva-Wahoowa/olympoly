@@ -25,5 +25,6 @@ To set up the environment and explore the analysis, clone the repository and ins
 git clone https://github.com/caleb-adhikari/olympoly.git
 cd olympoly
 python -m pip install -e ".[dev]"
+pip install python-dotenv
 ```
 
