@@ -25,6 +25,28 @@ To set up the environment and explore the analysis, clone the repository and ins
 git clone https://github.com/caleb-adhikari/olympoly.git
 cd olympoly
 python -m pip install -e ".[dev]"
-pip install python-dotenv
 ```
 
+## Requirements
+
+`olympoly` requires:
+
+`python` >= 3.13
+
+`datasets` >= 4.8.4
+
+`numpy` >= 2.0
+
+`pandas` >=2.2
+
+`seaborn` >=0.13
+
+Optional requirements:
+
+`pytest`
+
+`jupyter`
+
+`matplotlib`
+
+`ruff`
