@@ -81,8 +81,8 @@ def plot_feature_importance(model):
     plt.show()
 
 # Visualizing a Tree
-    def plot_sample_tree(model):
-        tree = model.estimators_[0]
+def plot_sample_tree(model):
+    tree = model.estimators_[0]
 
     plt.figure(figsize=(12,6))
     plot_tree(tree,
@@ -94,18 +94,19 @@ def plot_feature_importance(model):
     plt.show()
 
 # Run Everything
-model, X_test, y_test, probs = train_rf_model(df)
+if __name__ == "__main__":
+    model, X_test, y_test, probs = train_rf_model(df)
 
-results = get_results(X_test, y_test, probs)
+    results = get_results(X_test, y_test, probs)
 
-print(results.head(15))
+    print(results.head(15))
 
-print("Winners avg prob:",
-      results[results['actual'] == 1]['pred_prob'].mean())
+    print("Winners avg prob:",
+        results[results['actual'] == 1]['pred_prob'].mean())
 
-print("Losers avg prob:",
-      results[results['actual'] == 0]['pred_prob'].mean())
+    print("Losers avg prob:",
+        results[results['actual'] == 0]['pred_prob'].mean())
 
-plot_feature_importance(model)
+    plot_feature_importance(model)
 
-plot_sample_tree(model)
+    plot_sample_tree(model)
