@@ -5,6 +5,7 @@ market_data.py - Load and process prediction market data
 for Olympics-related contracts (Kalshi / Polymarket style).
 """
 
+from __future__ import annotations
 import pandas as pd
 
 
@@ -86,7 +87,6 @@ def get_latest_prices(df):
     return df.loc[idx].reset_index(drop=True)
 
 
-from __future__ import annotations
 
 from typing import Any
 import requests
