@@ -1,6 +1,7 @@
 datasets>=4.8.4
 numpy>=2.0
 pandas>=2.2
+seaborn>=0.13
 
 [dev]
 pytest

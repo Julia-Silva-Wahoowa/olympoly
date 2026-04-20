@@ -7,6 +7,7 @@ Description-Content-Type: text/markdown
 Requires-Dist: datasets>=4.8.4
 Requires-Dist: numpy>=2.0
 Requires-Dist: pandas>=2.2
+Requires-Dist: seaborn>=0.13
 Provides-Extra: dev
 Requires-Dist: pytest; extra == "dev"
 Requires-Dist: jupyter; extra == "dev"
@@ -39,5 +40,5 @@ To set up the environment and explore the analysis, clone the repository and ins
 ```bash
 git clone https://github.com/caleb-adhikari/olympoly.git
 cd olympoly
-pip install .
+python -m pip install -e ".[dev]"
 ```
