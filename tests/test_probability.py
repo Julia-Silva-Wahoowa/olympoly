@@ -9,7 +9,6 @@ from olympoly.olympics_betting.probability import (
     weighted_medal_probability,
 )
 
-
 @pytest.fixture
 def sample_data():
     return pd.DataFrame({
