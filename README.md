@@ -41,6 +41,8 @@ python -m pip install -e ".[dev]"
 
 `seaborn` >=0.13
 
+'scikit-learn' >= 1.8.0
+
 Optional requirements:
 
 `pytest`
