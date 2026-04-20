@@ -41,70 +41,70 @@ def train_model(df):
 
 
 
+if __name__ == "__main__":
+    # =========================
+    # 1. TRAIN THE MODEL
+    # =========================
 
-# =========================
-# 1. TRAIN THE MODEL
-# =========================
+    # Train your logistic regression model using your feature pipeline
+    model, X_test, y_test = train_model(df)
 
-# Train your logistic regression model using your feature pipeline
-model, X_test, y_test = train_model(df)
+    # =========================
+    # 2. GET PREDICTIONS
+    # =========================
 
-# =========================
-# 2. GET PREDICTIONS
-# =========================
+    # Predict probability of winning gold for each test row
+    preds = model.predict_proba(X_test)[:, 1]
 
-# Predict probability of winning gold for each test row
-preds = model.predict_proba(X_test)[:, 1]
+    # =========================
+    # 3. BUILD RESULTS TABLE
+    # =========================
 
-# =========================
-# 3. BUILD RESULTS TABLE
-# =========================
+    # Copy test features so we can attach predictions
+    results = X_test.copy()
 
-# Copy test features so we can attach predictions
-results = X_test.copy()
+    # Add predicted probability
+    results['pred_prob'] = preds
 
-# Add predicted probability
-results['pred_prob'] = preds
+    # Add actual outcome (0 = no gold, 1 = gold)
+    results['actual'] = y_test.values
 
-# Add actual outcome (0 = no gold, 1 = gold)
-results['actual'] = y_test.values
+    # =========================
+    # 4. SORT BEST PREDICTIONS
+    # =========================
 
-# =========================
-# 4. SORT BEST PREDICTIONS
-# =========================
+    # Sort rows from highest predicted probability → lowest
+    top = results.sort_values('pred_prob', ascending=False)
 
-# Sort rows from highest predicted probability → lowest
-top = results.sort_values('pred_prob', ascending=False)
+    # Show top 15 predicted gold chances
+    print(top.head(15))
 
-# Show top 15 predicted gold chances
-print(top.head(15))
+    # =========================
+    # 5. CHECK MODEL VARIATION
+    # =========================
 
-# =========================
-# 5. CHECK MODEL VARIATION
-# =========================
+    # How many unique probability values exist?
+    print("Unique probabilities:", results['pred_prob'].nunique())
 
-# How many unique probability values exist?
-print("Unique probabilities:", results['pred_prob'].nunique())
+    # =========================
+    # 6. MODEL QUALITY CHECK
+    # =========================
 
-# =========================
-# 6. MODEL QUALITY CHECK
-# =========================
+    # Average predicted probability for actual winners
+    print("Winners avg prob:",
+        results[results['actual'] == 1]['pred_prob'].mean())
 
-# Average predicted probability for actual winners
-print("Winners avg prob:",
-      results[results['actual'] == 1]['pred_prob'].mean())
+    # Average predicted probability for non-winners
+    print("Losers avg prob:",
+        results[results['actual'] == 0]['pred_prob'].mean())
 
-# Average predicted probability for non-winners
-print("Losers avg prob:",
-      results[results['actual'] == 0]['pred_prob'].mean())
+    # =========================
+    # 7. MODEL PERFORMANCE SCORE
+    # =========================
 
-# =========================
-# 7. MODEL PERFORMANCE SCORE
-# =========================
+    from sklearn.metrics import roc_auc_score
 
-from sklearn.metrics import roc_auc_score
+    # AUC = how well model separates winners vs losers
+    auc = roc_auc_score(y_test, preds)
 
-# AUC = how well model separates winners vs losers
-auc = roc_auc_score(y_test, preds)
-
-print("AUC:", auc)
+    print("AUC:", auc)
