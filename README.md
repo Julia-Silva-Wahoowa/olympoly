@@ -27,28 +27,20 @@ cd olympoly
 python -m pip install -e ".[dev]"
 ```
 
-## Requirements
+Requirements 
+---
+``olympoly`` requires:
 
-`olympoly` requires:
-
-`python` >= 3.13
-
-`datasets` >= 4.8.4
-
-`numpy` >= 2.0
-
-`pandas` >=2.2
-
-`seaborn` >=0.13
-
-'scikit-learn' >= 1.8.0
+* ``python``, >=3.13
+* ``datasets``, >=4.8.4
+* ``numpy``, >=2.0
+* ``pandas``, >=2.2
+* ``seaborn``, >=0.13
+* ``scikit-learn``, >=1.8.0
 
 Optional requirements:
 
-`pytest`
-
-`jupyter`
-
-`matplotlib`
-
-`ruff`
+* ``pytest``
+* ``jupyter``
+* ``matplotlib``
+* ``ruff``
