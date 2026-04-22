@@ -28,6 +28,7 @@ python -m pip install -e ".[dev]"
 ```
 
 Requirements 
+[![Python Version](https://img.shields.io/badge/python-3.13%2B-blue.svg)](https://www.python.org/)
 ---
 ``olympoly`` requires:
 
