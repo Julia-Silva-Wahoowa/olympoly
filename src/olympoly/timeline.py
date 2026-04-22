@@ -1,5 +1,3 @@
-# timeline.py
-
 """
 timeline.py - Analyze Olympics trends over time.
 
@@ -17,15 +15,9 @@ sns.set(style="whitegrid")
 
 
 def participation_trends(df, by_gender=True, plot=True):
-    """
-    Analyze athlete participation over time.
-    """
-
-    # ✅ Validate required columns
     if "Year" not in df.columns or "ID" not in df.columns:
         raise ValueError("DataFrame must contain 'Year' and 'ID' columns")
 
-    # ✅ FIXED: inside function
     gender_col = (
         "Sex" if "Sex" in df.columns
         else "Gender" if "Gender" in df.columns
@@ -61,11 +53,6 @@ def participation_trends(df, by_gender=True, plot=True):
 
 
 def medal_trends(df, entity="Team", top_n=5, plot=True):
-    """
-    Analyze medal trends over time.
-    """
-
-    # ✅ Validate columns
     required_cols = {"Year", "Medal", entity}
     if not required_cols.issubset(df.columns):
         raise ValueError(f"Missing required columns: {required_cols}")
@@ -102,11 +89,6 @@ def medal_trends(df, entity="Team", top_n=5, plot=True):
 
 
 def sport_popularity(df, plot=True):
-    """
-    Analyze popularity of sports over time.
-    """
-
-    # ✅ Validate columns
     required_cols = {"Year", "Sport", "ID"}
     if not required_cols.issubset(df.columns):
         raise ValueError(f"Missing required columns: {required_cols}")
