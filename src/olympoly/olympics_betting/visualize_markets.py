@@ -1,10 +1,5 @@
 """
 visualize_markets.py - Visualization tools for Olympics prediction markets
-
-Supports:
-- Price trends over time
-- Market vs model comparisons
-- Edge (mispricing) visualization
 """
 
 import pandas as pd
@@ -13,14 +8,8 @@ import matplotlib.pyplot as plt
 
 
 def plot_price_over_time(df, event, use_normalized=False):
-    """
-    Plot price (or normalized price) over time for a given event.
+    plt.figure()  # ✅ FIX
 
-    Args:
-        df (pd.DataFrame): market data
-        event (str): event name
-        use_normalized (bool): whether to use normalized_price
-    """
     subset = df[df["event"] == event].copy()
 
     if subset.empty:
@@ -42,13 +31,8 @@ def plot_price_over_time(df, event, use_normalized=False):
 
 
 def plot_market_comparison(df, event):
-    """
-    Compare prices across markets (e.g., Kalshi vs Polymarket) for a given event.
+    plt.figure()  # ✅ FIX
 
-    Args:
-        df (pd.DataFrame): market data
-        event (str): event name
-    """
     subset = df[df["event"] == event].copy()
 
     if subset.empty:
@@ -60,8 +44,11 @@ def plot_market_comparison(df, event):
 
     for market in latest["market"].unique():
         data = latest[latest["market"] == market]
+
+        labels = data["outcome"].astype(str) + f" ({market})"
+
         plt.bar(
-            data["outcome"].astype(str) + f" ({market})",
+            labels,
             data["price"]
         )
 
@@ -74,13 +61,8 @@ def plot_market_comparison(df, event):
 
 
 def plot_latest_snapshot(df, event):
-    """
-    Bar chart of latest market probabilities for an event.
+    plt.figure()  # ✅ FIX
 
-    Args:
-        df (pd.DataFrame): market data
-        event (str): event name
-    """
     subset = df[df["event"] == event].copy()
 
     if subset.empty:
@@ -89,7 +71,7 @@ def plot_latest_snapshot(df, event):
     idx = subset.groupby(["outcome"])["timestamp"].idxmax()
     latest = subset.loc[idx]
 
-    plt.bar(latest["outcome"], latest["price"])
+    plt.bar(latest["outcome"].astype(str), latest["price"])  # ✅ FIX (force string)
 
     plt.xlabel("Outcome")
     plt.ylabel("Price")
@@ -100,14 +82,8 @@ def plot_latest_snapshot(df, event):
 
 
 def plot_market_vs_model(df_compare):
-    """
-    Compare market probabilities vs model probabilities.
+    plt.figure()  # ✅ FIX
 
-    Args:
-        df_compare (pd.DataFrame):
-            Output from compare_market_vs_model()
-            Must contain ['event', 'market_prob', 'model_prob']
-    """
     required_cols = {"event", "market_prob", "model_prob"}
     if not required_cols.issubset(df_compare.columns):
         raise ValueError(f"Missing required columns: {required_cols}")
@@ -130,15 +106,8 @@ def plot_market_vs_model(df_compare):
 
 
 def plot_top_edges(df_compare, n=10):
-    """
-    Plot top N biggest mispricings (edges).
+    plt.figure()  # ✅ FIX
 
-    Args:
-        df_compare (pd.DataFrame):
-            Output from compare_market_vs_model()
-            Must contain ['event', 'difference']
-        n (int): number of top edges to display
-    """
     if "difference" not in df_compare.columns:
         raise ValueError("Column 'difference' not found")
 
@@ -157,15 +126,8 @@ def plot_top_edges(df_compare, n=10):
 
 
 def plot_probability_distribution(df_compare):
-    """
-    Scatter plot of market vs model probabilities.
+    plt.figure()  # ✅ FIX
 
-    Helps visualize calibration.
-
-    Args:
-        df_compare (pd.DataFrame):
-            Must contain ['market_prob', 'model_prob']
-    """
     if not {"market_prob", "model_prob"}.issubset(df_compare.columns):
         raise ValueError("Missing required columns")
 
@@ -175,7 +137,6 @@ def plot_probability_distribution(df_compare):
     plt.ylabel("Model Probability")
     plt.title("Market vs Model Scatter")
 
-    # 45-degree reference line
     min_val = min(df_compare["market_prob"].min(), df_compare["model_prob"].min())
     max_val = max(df_compare["market_prob"].max(), df_compare["model_prob"].max())
 
