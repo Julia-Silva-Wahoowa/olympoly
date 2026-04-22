@@ -3,6 +3,7 @@ import os
 from dotenv import load_dotenv
 import pandas as pd
 import requests
+from pathlib import Path
 
 load_dotenv()
 
@@ -57,3 +58,13 @@ def load_demographic_data():
     for col in ["POP", "TFR", "E0", "IMR", "GR", "NMR", "CBR", "CDR"]:
         df[col] = pd.to_numeric(df[col])
     return df
+# Load data of a list of host countries 
+
+def load_host_data():
+    BASE_DIR = Path(__file__).resolve().parent
+    df = pd.read_csv(BASE_DIR / "Host_Countries.csv")
+    return df
+
+if __name__ == "__main__":
+    data = load_host_data()
+    print(data.head(10))
