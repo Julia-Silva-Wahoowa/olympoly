@@ -8,36 +8,42 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, classification_report, roc_auc_score
 from sklearn.tree import plot_tree
 
+from olympoly.load_data import load_olympic_data
 
-def build_features(df):
+def compute_group_features(df):
     df = df.copy()
-
     df['is_gold'] = (df['Medal'] == 'Gold').astype(int)
 
     country_strength = df.groupby('NOC')['is_gold'].mean()
-    athlete_gold_rate = df.groupby('Name')['is_gold'].mean()
-    event_strength = df.groupby('Event')['is_gold'].mean()
+    sport_strength = df.groupby('Sport')['is_gold'].mean()
 
-    df = df.join(country_strength, on='NOC', rsuffix='_country')
-    df = df.join(athlete_gold_rate, on='Name', rsuffix='_athlete')
-    df = df.join(event_strength, on='Event', rsuffix='_event')
+    athlete_exp = df.groupby('Name').cumcount() + 1
 
-    return df[[
-        'is_gold_country',
-        'is_gold_athlete',
-        'is_gold_event',
-        'is_gold'
-    ]].rename(columns={
-        'is_gold_country': 'country_strength',
-        'is_gold_athlete': 'athlete_gold_rate',
-        'is_gold_event': 'event_strength'
-    }).dropna()
+    return {
+        "country_strength": country_strength,
+        "athlete_exp": athlete_exp,
+        "sport_strength": sport_strength
+    }
+
+def build_features(df):
+    df = df.copy()
+    df['is_gold'] = (df['Medal'] == 'Gold').astype(int)
+
+    features = compute_group_features(df)
+
+    df['country_strength'] = df['NOC'].map(features['country_strength'])
+    df['athlete_exp'] = features['athlete_exp']
+    df['sport_strength'] = df['Sport'].map(features['sport_strength'])
+
+    return df[
+        ['country_strength', 'athlete_exp', 'sport_strength', 'is_gold']
+    ].dropna()
 
 
 def train_rf_model(df):
     df_feat = build_features(df)
 
-    X = df_feat[['country_strength', 'athlete_gold_rate', 'event_strength']]
+    X = df_feat[['country_strength', 'athlete_exp', 'sport_strength']]
     y = df_feat['is_gold']
 
     X_train, X_test, y_train, y_test = train_test_split(
@@ -71,7 +77,7 @@ def get_results(X_test, y_test, probs):
 
 def plot_feature_importance(model):
     importances = model.feature_importances_
-    features = ['country_strength', 'athlete_gold_rate', 'event_strength']
+    features = ['country_strength', 'athlete_exp', 'sport_strength']
 
     sorted_idx = np.argsort(importances)
 
@@ -88,7 +94,7 @@ def plot_sample_tree(model):
     plt.figure(figsize=(12,6))
     plot_tree(
         tree_model,
-        feature_names=['country_strength', 'athlete_gold_rate', 'event_strength'],
+        feature_names=['country_strength', 'athlete_exp', 'sport_strength'],
         filled=True,
         max_depth=3
     )
@@ -96,23 +102,17 @@ def plot_sample_tree(model):
     plt.show()
 
 
-def predict_from_real_data(model, df, noc, athlete_name, event_name):
-    df = df.copy()
+def predict_from_real_data(model, df, noc, athlete_name, sport_name):
+    features = compute_group_features(df)
 
-    df['is_gold'] = (df['Medal'] == 'Gold').astype(int)
-
-    country_strength = df.groupby('NOC')['is_gold'].mean()
-    athlete_gold_rate = df.groupby('Name')['is_gold'].mean()
-    event_strength = df.groupby('Event')['is_gold'].mean()
-
-    cs = country_strength.get(noc, 0)
-    ag = athlete_gold_rate.get(athlete_name, 0)
-    es = event_strength.get(event_name, 0)
+    cs = features['country_strength'].get(noc, 0)
+    ag = features['athlete_exp'].get(athlete_name, 0)
+    es = features['sport_strength'].get(sport_name, 0)
 
     X_input = pd.DataFrame({
         "country_strength": [cs],
-        "athlete_gold_rate": [ag],
-        "event_strength": [es]
+        "athlete_exp": [ag],
+        "sport_strength": [es]
     })
 
     return model.predict_proba(X_input)[:, 1][0]
@@ -123,8 +123,7 @@ def predict_from_real_data(model, df, noc, athlete_name, event_name):
 # =========================
 if __name__ == "__main__":
 
-    # IMPORTANT: define df only once and use consistently
-    df = df.copy()  # ensures no accidental mutation issues
+    df = load_olympic_data()
 
     model, X_test, y_test, probs = train_rf_model(df)
 
@@ -142,15 +141,15 @@ if __name__ == "__main__":
     plot_sample_tree(model)
 
     # Pick 5 real athletes from dataset
-    examples = df.dropna(subset=["Name", "Event", "NOC"]).sample(5)[
-    ["NOC", "Name", "Event"]
+    examples = df.dropna(subset=["Name", "Sport", "NOC"]).sample(5)[
+    ["NOC", "Name", "Sport"]
     ].values
 
-    for noc, name, event in examples:
-        prob = predict_from_real_data(model, df, noc, name, event)
+    for noc, name, sport in examples:
+        prob = predict_from_real_data(model, df, noc, name, sport)
     
         print(f"Athlete: {name}")
         print(f"Country: {noc}")
-        print(f"Event: {event}")
+        print(f"Sport: {sport}")
         print(f"Predicted Gold Probability: {prob:.4f}")
         print("-" * 40)
