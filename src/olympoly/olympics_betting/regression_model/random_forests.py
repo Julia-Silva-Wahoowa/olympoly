@@ -17,7 +17,8 @@ def compute_group_features(df):
     country_strength = df.groupby('NOC')['is_gold'].mean()
     sport_strength = df.groupby('Sport')['is_gold'].mean()
 
-    athlete_exp = df.groupby('Name').cumcount() + 1
+    # FIX: proper per-athlete experience
+    athlete_exp = df.groupby('Name').size()
 
     return {
         "country_strength": country_strength,
@@ -32,7 +33,7 @@ def build_features(df):
     features = compute_group_features(df)
 
     df['country_strength'] = df['NOC'].map(features['country_strength'])
-    df['athlete_exp'] = features['athlete_exp']
+    df['athlete_exp'] = df['Name'].map(features['athlete_exp'])
     df['sport_strength'] = df['Sport'].map(features['sport_strength'])
 
     return df[
@@ -41,18 +42,26 @@ def build_features(df):
 
 
 def train_rf_model(df):
+    df = df.copy()
+    df['is_gold'] = (df['Medal'] == 'Gold').astype(int)
+
+    # build features BEFORE split
     df_feat = build_features(df)
 
     X = df_feat[['country_strength', 'athlete_exp', 'sport_strength']]
     y = df_feat['is_gold']
 
+    # IMPORTANT: stratify prevents single-class test folds
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42
+        X, y,
+        test_size=0.2,
+        random_state=42,
+        stratify=y
     )
 
     model = RandomForestClassifier(
-        n_estimators=100,
-        max_depth=5,
+        n_estimators=200,   # slightly stronger signal
+        max_depth=6,
         random_state=42
     )
 
@@ -62,7 +71,12 @@ def train_rf_model(df):
     probs = model.predict_proba(X_test)[:, 1]
 
     print("Accuracy:", accuracy_score(y_test, preds))
-    print("AUC:", roc_auc_score(y_test, probs))
+
+    # SAFE AUC (prevents nan crash in tests)
+    if len(np.unique(y_test)) > 1:
+        print("AUC:", roc_auc_score(y_test, probs))
+    else:
+        print("AUC: undefined (single class)")
 
     return model, X_test, y_test, probs
 
@@ -109,13 +123,13 @@ def predict_from_real_data(model, df, noc, athlete_name, sport_name):
     ag = features['athlete_exp'].get(athlete_name, 0)
     es = features['sport_strength'].get(sport_name, 0)
 
-    X_input = pd.DataFrame({
-        "country_strength": [cs],
-        "athlete_exp": [ag],
-        "sport_strength": [es]
-    })
+    X_input = pd.DataFrame([{
+        "country_strength": cs,
+        "athlete_exp": ag,
+        "sport_strength": es
+    }])
 
-    return model.predict_proba(X_input)[:, 1][0]
+    return model.predict_proba(X_input)[0, 1]
 
 
 # =========================
