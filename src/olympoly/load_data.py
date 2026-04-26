@@ -41,6 +41,10 @@ def load_data():
     """Wrapper for legacy support so other files don't break."""
     return get_cleaned_data()
 
+def load_olympic_data():
+    """Legacy wrapper for old tests."""
+    return get_cleaned_data()
+
 
 def load_demographic_data():
     API_KEY = os.getenv("API_KEY")
