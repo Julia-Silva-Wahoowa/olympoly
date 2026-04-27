@@ -1,43 +1,39 @@
 import pandas as pd
 
 
-def compare_market_vs_model(df_market, df_model, market_col="event", model_col="event"):
+def compare_market_vs_model(df_market, df_model, model_col="event"):
     """
-    Compare market probabilities with model predictions.
-
-    Parameters:
-        df_market (pd.DataFrame):
-            Must contain columns ['event', 'price']
-
-        df_model (pd.DataFrame):
-            Must contain columns ['event' or other identifier, 'model_prob']
-
-        market_col (str):
-            Column name in df_market to merge on (default: "event")
-
-        model_col (str):
-            Column name in df_model to merge on (default: "event")
-
-    Returns:
-        pd.DataFrame with comparison and differences
+    Merge market and model probabilities and compute edge (difference).
     """
 
-    # Rename market column for clarity
+    # -----------------------
+    # Validate required columns
+    # -----------------------
+    if "event" not in df_market.columns:
+        raise ValueError("df_market must contain 'event'")
+    if "price" not in df_market.columns:
+        raise ValueError("df_market must contain 'price'")
+    if "model_prob" not in df_model.columns:
+        raise ValueError("df_model must contain 'model_prob'")
+
+    # -----------------------
+    # Rename for consistency
+    # -----------------------
     market = df_market.copy().rename(columns={"price": "market_prob"})
+    model = df_model.copy()
 
-    # Merge using flexible column names
-    merged = pd.merge(
-        market,
-        df_model,
-        left_on=market_col,
-        right_on=model_col,
-        how="inner"
-    )
+    # If model uses different join column (e.g. NOC)
+    if model_col != "event":
+        model = model.rename(columns={model_col: "event"})
 
-    # Compute disagreement
+    # -----------------------
+    # Merge
+    # -----------------------
+    merged = pd.merge(market, model, on="event", how="inner")
+
+    # -----------------------
+    # Compute difference
+    # -----------------------
     merged["difference"] = merged["market_prob"] - merged["model_prob"]
-
-    # Sort by biggest disagreement
-    merged = merged.sort_values(by="difference", key=abs, ascending=False)
 
     return merged
