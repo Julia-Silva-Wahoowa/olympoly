@@ -19,7 +19,7 @@ def sample_csv(tmp_path):
 
 # add file path here when we have our data from online:
 
-#def test_load_data_reads_csv(sample_csv):
+def test_load_data_reads_csv(sample_csv):
     file_path, original_df = sample_csv
 
     loaded_df = load_data(file_path)
