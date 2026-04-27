@@ -15,6 +15,16 @@ sns.set(style="whitegrid")
 
 
 def participation_trends(df, by_gender=True, plot=True):
+    """Analyze athlete participation trends over Olympic history.
+
+    Parameters:
+        df: DataFrame with 'Year', 'ID', and optionally 'Sex' columns.
+        by_gender: If True, break down participation by gender.
+        plot: If True, display a line chart.
+
+    Returns:
+        DataFrame with participation counts by year.
+    """
     if "Year" not in df.columns or "ID" not in df.columns:
         raise ValueError("DataFrame must contain 'Year' and 'ID' columns")
 
@@ -53,6 +63,17 @@ def participation_trends(df, by_gender=True, plot=True):
 
 
 def medal_trends(df, entity="Team", top_n=5, plot=True):
+    """Track medal counts over time for the top countries or sports.
+
+    Parameters:
+        df: DataFrame with 'Year', 'Medal', and entity columns.
+        entity: Column to group by ('Team' or 'Sport').
+        top_n: Number of top entities to include.
+        plot: If True, display a line chart.
+
+    Returns:
+        DataFrame with medal counts by year for top entities.
+    """
     required_cols = {"Year", "Medal", entity}
     if not required_cols.issubset(df.columns):
         raise ValueError(f"Missing required columns: {required_cols}")
@@ -89,6 +110,15 @@ def medal_trends(df, entity="Team", top_n=5, plot=True):
 
 
 def sport_popularity(df, plot=True):
+    """Analyze how athlete participation per sport changes over time.
+
+    Parameters:
+        df: DataFrame with 'Year', 'Sport', and 'ID' columns.
+        plot: If True, display a line chart of the top 5 sports.
+
+    Returns:
+        DataFrame with athlete counts by year and sport.
+    """
     required_cols = {"Year", "Sport", "ID"}
     if not required_cols.issubset(df.columns):
         raise ValueError(f"Missing required columns: {required_cols}")

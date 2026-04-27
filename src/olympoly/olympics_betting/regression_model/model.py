@@ -4,6 +4,14 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_auc_score
 
 def build_features(train_df, test_df):
+    """Engineer features for gold medal prediction using country strength and athlete experience.
+
+    Parameters:
+        df: DataFrame with 'Medal', 'NOC', 'Name', and 'ID' columns.
+
+    Returns:
+        DataFrame with country_strength, athlete_exp, and is_gold columns.
+    """
     train_df = train_df.copy()
     test_df = test_df.copy()
 
@@ -34,6 +42,14 @@ def build_features(train_df, test_df):
 
 
 def train_model(df):
+    """Train a logistic regression model to predict gold medal outcomes.
+
+    Parameters:
+        df: DataFrame with Olympic athlete data.
+
+    Returns:
+        Tuple of (fitted model, X_test, y_test).
+    """
 
     # =========================
     # ENTITY-LEVEL SPLIT (FIXED LEAKAGE)
