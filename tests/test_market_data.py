@@ -17,7 +17,7 @@ from olympoly.olympics_betting.market_data import (
 
 @pytest.fixture
 def sample_df():
-    """Sample dataset for testing market data functions"""
+    """Create a sample market data frame for testing"""
     return pd.DataFrame({
         "market": ["kalshi", "kalshi", "kalshi", "kalshi"],
         "event": ["USA_gold", "USA_gold", "USA_gold", "USA_gold"],
@@ -37,12 +37,12 @@ def sample_df():
 # -------------------------
 
 def test_validate_market_data(sample_df):
-    """Should pass for valid data"""
+    """Verify valid data passes validation"""
     validate_market_data(sample_df)
 
 
 def test_validate_market_data_invalid_price(sample_df):
-    """Should fail if price is not between 0 and 1"""
+    """Verify error raised for invalid price"""
     bad_df = sample_df.copy()
     bad_df.loc[0, "price"] = 1.5
 
@@ -51,7 +51,7 @@ def test_validate_market_data_invalid_price(sample_df):
 
 
 def test_validate_market_data_missing_column(sample_df):
-    """Should fail if required column missing"""
+    """Verify error raised when required column is missing"""
     bad_df = sample_df.drop(columns=["price"])
 
     with pytest.raises(ValueError):
@@ -73,7 +73,7 @@ def test_normalize_prices(sample_df):
 
 
 def test_normalize_prices_column_exists(sample_df):
-    """Check normalized_price column is added"""
+    """Check normalized_price column exists"""
     result = normalize_prices(sample_df)
 
     assert "normalized_price" in result.columns
@@ -84,7 +84,7 @@ def test_normalize_prices_column_exists(sample_df):
 # -------------------------
 
 def test_merge_market_data(sample_df):
-    """Merged dataset should double in size"""
+    """Verify merging doubles dataset size"""
     merged = merge_market_data(sample_df, sample_df)
 
     assert len(merged) == len(sample_df) * 2
@@ -95,7 +95,7 @@ def test_merge_market_data(sample_df):
 # -------------------------
 
 def test_get_latest_prices(sample_df):
-    """Should return latest rows per event/outcome"""
+    """Verify latest row per outcome is returned"""
     df_copy = sample_df.copy()
     df_copy["timestamp"] = pd.to_datetime(df_copy["timestamp"])
 
@@ -106,10 +106,23 @@ def test_get_latest_prices(sample_df):
 
 
 def test_get_latest_prices_correct_date(sample_df):
-    """Ensure latest timestamp is selected"""
+    """Verify latest timestamp is selected"""
     df_copy = sample_df.copy()
     df_copy["timestamp"] = pd.to_datetime(df_copy["timestamp"])
 
     latest = get_latest_prices(df_copy)
 
     assert all(latest["timestamp"] == pd.Timestamp("2024-07-02"))
+
+def test_validate_market_data_price_boundaries():
+    """Verify prices at the valid boundaries 0 and 1 pass validation"""
+
+    df = pd.DataFrame({
+        "market": ["kalshi", "kalshi"],
+        "event": ["USA_gold", "USA_gold"],
+        "outcome": ["YES", "NO"],
+        "price": [1.0, 0.0],
+        "timestamp": ["2024-07-01", "2024-07-01"]
+    })
+
+    validate_market_data(df)
