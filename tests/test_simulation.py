@@ -373,3 +373,20 @@ def test_empty_dataframe():
     assert results.empty
     assert summary["num_bets"] == 0
     assert summary["roi"] == 0
+
+def test_market_strategy_exact_summary_values(sample_df):
+    """Test that simulate_market_strategy returns the expected summary values
+    for a fixed input and random seed. checks that the simulation is running successfully, 
+    and calculating key results correctly"""
+    results, summary = simulate_market_strategy(
+        sample_df,
+        bankroll=100,
+        bet_size=0.1,
+        edge_threshold=0.0,
+        seed=42
+    )
+
+    assert summary["num_bets"] == 4
+    assert summary["final_bankroll"] == pytest.approx(100.0)
+    assert summary["total_return"] == pytest.approx(0.0)
+    assert summary["roi"] == pytest.approx(0.0)
