@@ -15,13 +15,14 @@ dependencies = [
     "pandas>=2.2",
     "seaborn>=0.13",
     "scikit-learn>=1.8.0",
-    "python-dotenv"
+    "python-dotenv",
+    "requests",
+    "matplotlib",
 ]
 
 [project.optional-dependencies]
 dev = [
     "pytest",      
     "jupyter", 
-    "matplotlib", 
     "ruff",       
 ]
