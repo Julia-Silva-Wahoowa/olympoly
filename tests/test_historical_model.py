@@ -99,3 +99,11 @@ def test_rolling_country_performance_no_country(sample_df):
     result = rolling_country_performance(sample_df, "Nonexistent")
 
     assert result.empty
+
+def test_country_medal_probability_missing_columns(sample_df):
+    """Ensure country_medal_probability raises an error when required columns are missing from the input DataFrame"""
+
+    bad_df = sample_df.drop(columns=["Medal"])
+
+    with pytest.raises(KeyError):
+        country_medal_probability(bad_df, "USA")
