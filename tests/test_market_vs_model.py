@@ -47,3 +47,12 @@ def test_custom_column_names():
     result = compare_market_vs_model(df_market, df_model, model_col="NOC")
 
     assert not result.empty
+
+def test_validate_market_data_negative_price(sample_df):
+    """Verify error is raised for a negative price """
+
+    bad_df = sample_df.copy()
+    bad_df.loc[0, "price"] = -0.1
+
+    with pytest.raises(ValueError):
+        validate_market_data(bad_df)
