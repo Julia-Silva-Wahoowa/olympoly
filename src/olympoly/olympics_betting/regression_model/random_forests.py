@@ -93,7 +93,24 @@ def plot_sample_tree(model):
     plt.title("Sample Tree from Random Forest")
     plt.show()
 
-# Run Everything
+
+def predict_from_real_data(model, df, noc, athlete_name, sport_name):
+    features = compute_group_features(df)
+
+    cs = features['country_strength'].get(noc, 0)
+    ag = features['athlete_exp'].get(athlete_name, 0)
+    es = features['sport_strength'].get(sport_name, 0)
+
+    X_input = pd.DataFrame([{
+        "country_strength": cs,
+        "athlete_exp": ag,
+        "sport_strength": es}])
+
+    return model.predict_proba(X_input)[0, 1]
+
+# =========================
+# RUN EVERYTHING (FIXED)
+# =========================
 if __name__ == "__main__":
     model, X_test, y_test, probs = train_rf_model(df)
 
