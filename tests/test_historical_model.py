@@ -107,3 +107,17 @@ def test_country_medal_probability_missing_columns(sample_df):
 
     with pytest.raises(KeyError):
         country_medal_probability(bad_df, "USA")
+    
+def test_country_medal_probability_no_medals():
+    """Verify country medal probability is 0.0 when the country exists but has no medal-winning entries"""
+
+    df = pd.DataFrame({
+        "Team": ["Italy", "Italy"],
+        "Sport": ["Swimming", "Athletics"],
+        "Year": [2000, 2004],
+        "Medal": [None, None]
+    })
+
+    prob = country_medal_probability(df, "Italy")
+
+    assert prob == 0.0
