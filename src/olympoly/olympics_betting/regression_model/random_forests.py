@@ -9,6 +9,25 @@ from sklearn.tree import plot_tree
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.pipeline import Pipeline
 
+from olympoly.load_data import load_olympic_data
+
+
+def compute_group_features(df):
+    df = df.copy()
+    df['is_gold'] = (df['Medal'] == 'Gold').astype(int)
+
+    country_strength = df.groupby('NOC')['is_gold'].mean()
+    sport_strength = df.groupby('Sport')['is_gold'].mean()
+
+    # FIX: proper per-athlete experience
+    athlete_exp = df.groupby('Name').size()
+
+    return {
+        "country_strength": country_strength,
+        "athlete_exp": athlete_exp,
+        "sport_strength": sport_strength
+    }
+
 
 class OlympicFeatureEngineer(BaseEstimator, TransformerMixin):
     """
@@ -74,12 +93,16 @@ def train_rf_model(df):
     probs = pipeline.predict_proba(X_test)[:, 1]
 
     print("Accuracy:", accuracy_score(y_test, preds))
-    print("AUC:", roc_auc_score(y_test, probs))
+
+    # SAFE AUC (prevents nan crash in tests)
+    if len(np.unique(y_test)) > 1:
+        print("AUC:", roc_auc_score(y_test, probs))
+    else:
+        print("AUC: undefined (single class)")
 
     return pipeline, X_test, y_test, probs
 
 
-# Results table
 def get_results(X_test, y_test, probs):
     results = X_test.copy()
     results['pred_prob'] = probs

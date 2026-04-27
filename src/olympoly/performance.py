@@ -9,34 +9,6 @@ Functions:
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from olympoly.load_data import load_data
-
-
-def prepare_data():
-    """
-    Load and clean dataset for analysis.
-    Prepares data for performance and timeline modules.
-    """
-    df = load_data()
-    df_clean = df.copy()
-
-    # Clean Medal column
-    df_clean['Medal'] = df_clean['Medal'].replace('NA', pd.NA)
-
-    # Clean numeric columns
-    df_clean['Year'] = pd.to_numeric(df_clean['Year'], errors='coerce')
-    df_clean['Age'] = pd.to_numeric(df_clean['Age'], errors='coerce')
-    df_clean['Height'] = pd.to_numeric(df_clean['Height'], errors='coerce')
-    df_clean['Weight'] = pd.to_numeric(df_clean['Weight'], errors='coerce')
-
-    # Drop bad rows
-    df_clean = df_clean.dropna(subset=['ID', 'Team', 'Year'])
-
-    # Clean text columns
-    df_clean['Team'] = df_clean['Team'].str.strip()
-    df_clean['Sport'] = df_clean['Sport'].str.strip()
-
-    return df_clean
 
 
 def country_efficiency(df, min_athletes=50, plot=True):
@@ -73,7 +45,8 @@ def efficiency_trends(df, country, plot=True):
     df_country = df[df['Team'] == country]
 
     athletes = df_country.groupby('Year')['ID'].nunique()
-    medals = df_country[df_country['Medal'].notnull()].groupby('Year')['Medal'].count()
+    medals = df_country[df_country['Medal'].notnull()].groupby('Year')[
+        'Medal'].count()
 
     trends = pd.DataFrame({
         'Athletes': athletes,
@@ -97,13 +70,10 @@ def efficiency_trends(df, country, plot=True):
     return trends
 
 
-# Test the module
 if __name__ == "__main__":
-    df = prepare_data()
+    from olympoly.load_data import get_cleaned_data
+    df = get_cleaned_data()
     print(df.head())
     print(df[['Team', 'Medal']].head(10))
-
-# Call country_efficiency to see the bar chart
     efficiency_df = country_efficiency(df, min_athletes=50, plot=True)
-        # Optional: Call efficiency_trends for a specific country
-    trends = efficiency_trends(df, country="China", plot=True)
+    trends = efficiency_trends(df, country="United States", plot=True)

@@ -3,7 +3,6 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_auc_score
 
-
 def build_features(train_df, test_df):
     train_df = train_df.copy()
     test_df = test_df.copy()

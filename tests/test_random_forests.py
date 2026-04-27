@@ -10,6 +10,14 @@ from olympoly.olympics_betting.regression_model.random_forests import train_rf_m
 
 @pytest.fixture
 def sample_data():
+    """
+    Provides a mock Olympic results DataFrame for all tests in this file.
+
+    Uses 8 rows across multiple NOCs, athletes, years, and medal outcomes to
+    give build_features() and train_rf_model() realistic but controlled input
+    without touching the real dataset.
+    """
+
     return pd.DataFrame({
         'ID': [1, 2, 3, 4, 5, 6, 7, 8],
         'Name': [
@@ -99,6 +107,8 @@ def test_prediction_variation(sample_data):
 # -------------------------
 # Test: model has signal
 # -------------------------
+
+
 def test_model_signal():
     """
     To verify the model can learn a signal without leakage, 

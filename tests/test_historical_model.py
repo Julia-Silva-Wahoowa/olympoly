@@ -32,6 +32,7 @@ def sample_df():
 # -------------------------
 
 def test_country_medal_probability(sample_df):
+    """Verify medal probability for a country is computed correctly"""
     prob = country_medal_probability(sample_df, "USA")
 
     # USA: 3 entries, 2 medals → 2/3
@@ -39,6 +40,7 @@ def test_country_medal_probability(sample_df):
 
 
 def test_country_gold_probability(sample_df):
+    """Verify gold medal probability for a counttry is computed correctly"""
     prob = country_gold_probability(sample_df, "USA")
 
     # USA: 3 entries, 1 gold → 1/3
@@ -46,6 +48,7 @@ def test_country_gold_probability(sample_df):
 
 
 def test_country_probability_no_data(sample_df):
+    """Verify gold medal probability returns 0.0 when the country is absent"""
     prob = country_medal_probability(sample_df, "Nonexistent")
 
     assert prob == 0.0
@@ -56,6 +59,7 @@ def test_country_probability_no_data(sample_df):
 # -------------------------
 
 def test_sport_medal_probability(sample_df):
+    """verify medal probability for a sport is computed correctly"""
     prob = sport_medal_probability(sample_df, "Swimming")
 
     # Swimming: 2 entries, 1 medal → 1/2
@@ -63,6 +67,7 @@ def test_sport_medal_probability(sample_df):
 
 
 def test_sport_probability_no_data(sample_df):
+    """Verify sport medal proability returns 0.0 when the sport is absent"""
     prob = sport_medal_probability(sample_df, "Boxing")
 
     assert prob == 0.0
@@ -73,6 +78,7 @@ def test_sport_probability_no_data(sample_df):
 # -------------------------
 
 def test_rolling_country_performance_structure(sample_df):
+    """Verify rolling country performance returns a non-emptty data frame with expected columns"""
     result = rolling_country_performance(sample_df, "USA", window=2)
 
     assert not result.empty
@@ -81,6 +87,7 @@ def test_rolling_country_performance_structure(sample_df):
 
 
 def test_rolling_country_performance_values(sample_df):
+    """verify rolling country performance computes expected probibility values"""
     result = rolling_country_performance(sample_df, "USA", window=2)
 
     # Year 2000: 2 athletes, 1 medal → 0.5
@@ -88,6 +95,29 @@ def test_rolling_country_performance_values(sample_df):
 
 
 def test_rolling_country_performance_no_country(sample_df):
+    """verify rolling country performance returns and empty dataframe for an unkown country"""
     result = rolling_country_performance(sample_df, "Nonexistent")
 
     assert result.empty
+
+def test_country_medal_probability_missing_columns(sample_df):
+    """Ensure country_medal_probability raises an error when required columns are missing from the input DataFrame"""
+
+    bad_df = sample_df.drop(columns=["Medal"])
+
+    with pytest.raises(KeyError):
+        country_medal_probability(bad_df, "USA")
+    
+def test_country_medal_probability_no_medals():
+    """Verify country medal probability is 0.0 when the country exists but has no medal-winning entries"""
+
+    df = pd.DataFrame({
+        "Team": ["Italy", "Italy"],
+        "Sport": ["Swimming", "Athletics"],
+        "Year": [2000, 2004],
+        "Medal": [None, None]
+    })
+
+    prob = country_medal_probability(df, "Italy")
+
+    assert prob == 0.0
