@@ -1,14 +1,8 @@
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
-<<<<<<< Updated upstream
-
-def build_features(df):
-    df = df.copy()
-=======
 from sklearn.metrics import roc_auc_score
 from sklearn.linear_model import LogisticRegression
->>>>>>> Stashed changes
 
 
 def build_features(train_df, test_df):
@@ -116,8 +110,6 @@ if __name__ == "__main__":
     # =========================
     # 7. MODEL PERFORMANCE SCORE
     # =========================
-
-    from sklearn.metrics import roc_auc_score
 
     # AUC = how well model separates winners vs losers
     auc = roc_auc_score(y_test, preds)

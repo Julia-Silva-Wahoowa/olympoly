@@ -1,22 +1,89 @@
+import numpy as np
 import pandas as pd
+import pytest
+
 from olympoly.load_data import load_olympic_data
-from olympoly.olympics_betting.regression_model.model import train_model
+from sklearn.linear_model import LogisticRegression
+from olympoly.olympics_betting.regression_model.model import build_features, train_model
+
+"""
+What this file covers
+─────────────────────
+  TestBuildFeatures  — verifies that build_features() produces a clean,
+                       correctly shaped feature DataFrame from raw Olympic data.
+  TestTrainModel     — verifies that train_model() returns a fitted
+                       LogisticRegression with sensible outputs and basic
+                       predictive signal.
+
+Dependency note
+───────────────
+  Both model.py and this test file import from sklearn.  If pytest raises
+      ModuleNotFoundError: No module named 'sklearn'
+  run the following inside your active conda environment before re-running:
+
+      pip install scikit-learn
+"""
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Fixtures
+# ─────────────────────────────────────────────────────────────────────────────
+
+@pytest.fixture
+def sample_data():
+    """
+    Generate a synthetic Olympic results DataFrame large enough for reliable
+    logistic-regression tests.
+
+    Design constraints
+    ──────────────────
+    Row count (n=40)
+        train_model() calls train_test_split() with the default 75/25 split,
+        yielding ~10 test rows.  Fewer than ~20 total rows risk producing a
+        test split containing only one class, which breaks any metric that
+        requires both classes present in y_true.
+
+    Class balance
+        The medal pool ["Gold", "Silver", "Bronze", None, None] gives roughly
+        20% gold rows — realistic for Olympic data and ensures both 0 and 1
+        appear in the target column after build_features() encodes is_gold.
+
+    Feature variance
+        Five distinct NOCs and twelve distinct athlete names ensure that
+        country_strength and athlete_exp are not constant columns, which
+        would cause LogisticRegression to produce degenerate coefficients.
+
+    Reproducibility
+        np.random.default_rng(0) pins the random state so the fixture
+        produces identical data on every pytest run.
+    """
+    nocs   = ["USA", "CHN", "GBR", "AUS", "RUS"]
+    names  = [f"Athlete_{i}" for i in range(12)]
+    medals = ["Gold", "Silver", "Bronze", None, None]
+
+    rng = np.random.default_rng(0)
+    n   = 40
+
+    return pd.DataFrame({
+        "ID":    range(1, n + 1),
+        "Name":  rng.choice(names,   n).tolist(),
+        "NOC":   rng.choice(nocs,    n).tolist(),
+        "Year":  rng.choice([2000, 2004, 2008, 2012, 2016, 2020], n).tolist(),
+        "Sport": rng.choice(["Athletics", "Swimming", "Cycling"], n).tolist(),
+        "Medal": rng.choice(medals,  n).tolist(),
+    })
 
 
-# load your datase
-df = load_olympic_data()
-model = train_model(df)
+@pytest.fixture
+def built_features(sample_data):
+    """
+    Run build_features() on sample_data once and share the result across all
+    TestBuildFeatures tests via pytest's dependency injection.
 
-<<<<<<< Updated upstream
-print(model)
-=======
     Using a fixture rather than calling build_features() inside each test
     avoids redundant computation and ensures every test in the class operates
     on an identical DataFrame — no hidden state differences between tests.
     """
-    sample_train = sample_data[0:32]
-    sample_test  = sample_data[32:]
-    return build_features(sample_train, sample_test)   
+    return build_features(sample_data)
 
 
 @pytest.fixture
@@ -394,4 +461,3 @@ class TestTrainModel:
         p_strong = model.predict_proba(strong)[0, 1]
         p_weak   = model.predict_proba(weak)[0, 1]
         assert p_strong >= p_weak
->>>>>>> Stashed changes
