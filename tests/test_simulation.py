@@ -363,3 +363,13 @@ def test_large_dataset():
     result = country_efficiency(df, min_athletes=1, plot=False)
 
     assert not result.empty
+
+def test_empty_dataframe():
+    """test for empty input DataFrame which is important for edge case"""
+    df = pd.DataFrame(columns=["event", "price", "model_prob"])
+
+    results, summary = simulate_market_strategy(df)
+
+    assert results.empty
+    assert summary["num_bets"] == 0
+    assert summary["roi"] == 0
