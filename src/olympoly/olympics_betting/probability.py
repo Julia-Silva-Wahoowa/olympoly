@@ -1,4 +1,6 @@
+import numpy as np
 import pandas as pd
+
 
 def medal_probability(df, group_cols, medal_type="Gold"):
     """
@@ -26,6 +28,15 @@ def medal_probability(df, group_cols, medal_type="Gold"):
     return grouped
 
 def athlete_medal_probability(df):
+    """
+    Estimate probability of any medal for each athlete based on appearances.
+
+    Args:
+        df: pandas DataFrame with 'Name', 'ID', and 'Medal' columns
+
+    Returns:
+        DataFrame with athlete name, appearances, medals, and probability
+    """
     df = df.copy()
     df['is_medal'] = df['Medal'].notna().astype(int)
 
@@ -55,9 +66,6 @@ def weighted_medal_probability(df, group_cols, current_year, decay=0.9):
     grouped['probability'] = grouped['weighted_wins'] / grouped['weighted_total']
 
     return grouped
-
-import numpy as np
-import pandas as pd
 
 def exponential_recency_weight(years: pd.Series, current_year: int, half_life: float = 12.0) -> pd.Series:
     """Exponential decay weights: halves every `half_life` years."""

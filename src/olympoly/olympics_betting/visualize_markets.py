@@ -8,6 +8,7 @@ Supports:
 """
 
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 
 
@@ -113,10 +114,11 @@ def plot_market_vs_model(df_compare):
 
     df_plot = df_compare.copy()
 
-    x = range(len(df_plot))
+    x = np.arange(len(df_plot))
+    width = 0.35
 
-    plt.bar(x, df_plot["market_prob"], label="Market")
-    plt.bar(x, df_plot["model_prob"], bottom=df_plot["market_prob"] * 0)
+    plt.bar(x - width/2, df_plot["market_prob"], width, label="Market")
+    plt.bar(x + width/2, df_plot["model_prob"], width, label="Model")
 
     plt.xticks(x, df_plot["event"], rotation=45)
     plt.xlabel("Event")
