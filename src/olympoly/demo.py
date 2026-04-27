@@ -6,6 +6,11 @@ from olympoly.timeline import participation_trends, medal_trends, sport_populari
 
 
 def run_demo():
+    """Run a full demonstration of olympoly's analysis capabilities.
+    
+    Loads cleaned Summer Olympic data and showcases the performance
+    and timeline modules with sample plots and statistics.
+    """
     print("Loading cleaned Olympic data (Summer)...")
     df = get_cleaned_data(season="Summer")
 
