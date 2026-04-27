@@ -8,6 +8,13 @@ import matplotlib.pyplot as plt
 
 
 def plot_price_over_time(df, event, use_normalized=False):
+    """Plot prediction market price trends over time for a given event.
+
+    Parameters:
+        df: DataFrame with 'event', 'outcome', 'timestamp', and 'price' columns.
+        event: Event name to filter by.
+        use_normalized: If True, use normalized prices instead of raw prices.
+    """
     plt.figure()  # ✅ FIX
 
     subset = df[df["event"] == event].copy()
@@ -31,6 +38,12 @@ def plot_price_over_time(df, event, use_normalized=False):
 
 
 def plot_market_comparison(df, event):
+    """Compare latest prices across different prediction markets for an event.
+
+    Parameters:
+        df: DataFrame with 'event', 'market', 'outcome', 'timestamp', and 'price' columns.
+        event: Event name to filter by.
+    """
     plt.figure()  # ✅ FIX
 
     subset = df[df["event"] == event].copy()
@@ -61,6 +74,12 @@ def plot_market_comparison(df, event):
 
 
 def plot_latest_snapshot(df, event):
+    """Display a bar chart of the most recent prices for each outcome of an event.
+
+    Parameters:
+        df: DataFrame with 'event', 'outcome', 'timestamp', and 'price' columns.
+        event: Event name to filter by.
+    """
     plt.figure()  # ✅ FIX
 
     subset = df[df["event"] == event].copy()
@@ -82,6 +101,11 @@ def plot_latest_snapshot(df, event):
 
 
 def plot_market_vs_model(df_compare):
+    """Plot side-by-side bar chart comparing market and model probabilities.
+
+    Parameters:
+        df_compare: DataFrame with 'event', 'market_prob', and 'model_prob' columns.
+    """
     plt.figure()  # ✅ FIX
 
     required_cols = {"event", "market_prob", "model_prob"}
@@ -106,6 +130,12 @@ def plot_market_vs_model(df_compare):
 
 
 def plot_top_edges(df_compare, n=10):
+    """Plot the largest disagreements between market and model probabilities.
+
+    Parameters:
+        df_compare: DataFrame with 'event' and 'difference' columns.
+        n: Number of top edges to display.
+    """
     plt.figure()  # ✅ FIX
 
     if "difference" not in df_compare.columns:
@@ -126,6 +156,11 @@ def plot_top_edges(df_compare, n=10):
 
 
 def plot_probability_distribution(df_compare):
+    """Scatter plot comparing market vs model probabilities with a diagonal reference line.
+
+    Parameters:
+        df_compare: DataFrame with 'market_prob' and 'model_prob' columns.
+    """
     plt.figure()  # ✅ FIX
 
     if not {"market_prob", "model_prob"}.issubset(df_compare.columns):
