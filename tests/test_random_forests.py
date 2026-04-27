@@ -1,18 +1,18 @@
 import pandas as pd
 import pytest
 
-# import functions from your file
-from olympoly.olympics_betting.regression_model.random_forests import build_features, train_rf_model, get_results
+from olympoly.olympics_betting.regression_model.random_forests import train_rf_model, OlympicFeatureEngineer
 
 # -------------------------
 # Fixture: mock dataset
 # -------------------------
+
+
 @pytest.fixture
 def sample_data():
-    
     """
     Provides a mock Olympic results DataFrame for all tests in this file.
- 
+
     Uses 8 rows across multiple NOCs, athletes, years, and medal outcomes to
     give build_features() and train_rf_model() realistic but controlled input
     without touching the real dataset.
@@ -61,41 +61,36 @@ def sample_data():
 
 
 # -------------------------
-# Test: build_features
+# Test: Leakage Prevention
 # -------------------------
-def test_build_features(sample_data):
-    
-    """
-    Checks that build_features() returns a DataFrame containing the three
-    required columns (country_strength, athlete_exp, is_gold) with no null
-    values, country_strength bounded to [0, 1], and athlete_exp of at least 1.
-    """
-    
-    df_feat = build_features(sample_data)
+def test_pipeline_no_leakage(sample_data):
+    sample_data['is_gold'] = (sample_data['Medal'] == 'Gold').astype(int)
 
-    assert "country_strength" in df_feat.columns
-    assert "athlete_exp" in df_feat.columns
-    assert "is_gold" in df_feat.columns
+    train_df = sample_data.iloc[:5]  # Mock train set
+    test_df = sample_data.iloc[5:]  # Mock test set
 
-    assert df_feat.isnull().sum().sum() == 0
-    assert df_feat["country_strength"].between(0, 1).all()
-    assert (df_feat["athlete_exp"] >= 1).all()
+    engineer = OlympicFeatureEngineer()
+    engineer.fit(train_df[['NOC', 'Name', 'Sport']], train_df['is_gold'])
+
+    transformed_test = engineer.transform(test_df[['NOC', 'Name', 'Sport']])
+
+    # Test 1: 'CHN' had 1 gold out of 1 appearance in the TRAIN set (1.0).
+    # In test set, CHN gets another gold, but the aggregate shouldn't see it.
+    assert engineer.country_map_['CHN'] == 1.0
+
+    # Test 2: Unseen entities (FIJ, CMR) in test set should get the training set's global mean.
+    train_mean = train_df['is_gold'].mean()  # 2 golds in 5 rows = 0.4
+    assert transformed_test.iloc[1]['country_strength'] == train_mean  # FIJ
+    assert transformed_test.iloc[2]['country_strength'] == train_mean  # CMR
 
 
 # -------------------------
 # Test: model runs
 # -------------------------
 def test_train_rf_model(sample_data):
-    
-    """
-    Checks that train_rf_model() returns a 4-tuple of (model, X_test, y_test,
-    probs) where X_test and y_test have equal length, and all predicted
-    probabilities fall within [0, 1].
-    """
-    
-    model, X_test, y_test, probs = train_rf_model(sample_data)
+    pipeline, X_test, y_test, probs = train_rf_model(sample_data)
 
-    assert model is not None
+    assert pipeline is not None
     assert len(X_test) == len(y_test)
     assert len(probs) == len(y_test)
     assert ((probs >= 0) & (probs <= 1)).all()
@@ -105,36 +100,37 @@ def test_train_rf_model(sample_data):
 # Test: predictions vary
 # -------------------------
 def test_prediction_variation(sample_data):
-    
-    """
-    Checks that the model produces more than one unique predicted probability
-    across the test set, confirming it is not outputting a constant score for
-    every row.
-    """
-    
-    model, X_test, y_test, probs = train_rf_model(sample_data)
+    pipeline, X_test, y_test, probs = train_rf_model(sample_data)
 
     assert len(set(probs)) > 1
-
 
 # -------------------------
 # Test: model has signal
 # -------------------------
-def test_model_signal(sample_data):
-    
+
+
+def test_model_signal():
     """
-    Checks that the model's average predicted probability is higher for actual
-    gold-medal winners than for non-winners, verifying the model has learned
-    a meaningful directional signal from the training data.
+    To verify the model can learn a signal without leakage, 
+    we must provide data that actually contains a strong pattern.
     """
-    
-    model, X_test, y_test, probs = train_rf_model(sample_data)
+    # 15 guaranteed winners and 15 guaranteed losers
+    signal_data = pd.DataFrame({
+        'NOC': ['WIN_NOC']*15 + ['LOSE_NOC']*15,
+        'Name': ['Winner_Name']*15 + ['Loser_Name']*15,
+        'Sport': ['Win_Sport']*15 + ['Lose_Sport']*15,
+        'Medal': ['Gold']*15 + [None]*15
+    })
+
+    pipeline, X_test, y_test, probs = train_rf_model(signal_data)
 
     results = X_test.copy()
     results["pred_prob"] = probs
     results["actual"] = y_test.values
 
+    # Check the means of actual winners vs actual losers in the test set
     winners = results[results["actual"] == 1]["pred_prob"].mean()
     losers = results[results["actual"] == 0]["pred_prob"].mean()
 
+    # The model should easily pick up the 100% vs 0% pattern
     assert winners > losers
