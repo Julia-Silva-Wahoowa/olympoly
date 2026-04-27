@@ -113,3 +113,16 @@ def test_get_latest_prices_correct_date(sample_df):
     latest = get_latest_prices(df_copy)
 
     assert all(latest["timestamp"] == pd.Timestamp("2024-07-02"))
+
+def test_validate_market_data_price_boundaries():
+    """Verify prices at the valid boundaries 0 and 1 pass validation"""
+
+    df = pd.DataFrame({
+        "market": ["kalshi", "kalshi"],
+        "event": ["USA_gold", "USA_gold"],
+        "outcome": ["YES", "NO"],
+        "price": [1.0, 0.0],
+        "timestamp": ["2024-07-01", "2024-07-01"]
+    })
+
+    validate_market_data(df)
