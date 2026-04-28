@@ -12,6 +12,16 @@ import matplotlib.pyplot as plt
 
 
 def country_efficiency(df, min_athletes=50, plot=True):
+    """Calculate medal efficiency (medals per athlete) for each country.
+
+    Parameters:
+        df: DataFrame with 'Team', 'ID', and 'Medal' columns.
+        min_athletes: Minimum athlete count to include a country.
+        plot: If True, display a bar chart of the top 10 countries.
+
+    Returns:
+        DataFrame with Athletes, Medals, and Efficiency columns.
+    """
     athletes = df.groupby('Team')['ID'].nunique()
     medals = df[df['Medal'].notnull()].groupby('Team')['Medal'].count()
 
@@ -42,6 +52,16 @@ def country_efficiency(df, min_athletes=50, plot=True):
 
 
 def efficiency_trends(df, country, plot=True):
+    """Track a country's medal efficiency over time.
+
+    Parameters:
+        df: DataFrame with 'Team', 'Year', 'ID', and 'Medal' columns.
+        country: Country name to analyze.
+        plot: If True, display a line chart of efficiency over time.
+
+    Returns:
+        DataFrame with Athletes, Medals, and Efficiency by Year.
+    """
     df_country = df[df['Team'] == country]
 
     athletes = df_country.groupby('Year')['ID'].nunique()

@@ -18,6 +18,11 @@ def match_name(name, query, min_matches=2):
 
 # function to get athelete info based on input name
 def get_athlete_info(athlete_name: str):
+    """Look up and display Olympic history for an athlete by name.
+
+    Parameters:
+        athlete_name: Full or partial name of the athlete to search for.
+    """
     df = load_olympic_data()
     df["Name"] = df["Name"].str.split(",").str[0] # Drop last name
     df_filtered = df[df["Name"].apply(lambda x: match_name(x, athlete_name))]

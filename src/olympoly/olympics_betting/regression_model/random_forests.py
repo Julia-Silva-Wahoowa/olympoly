@@ -13,6 +13,14 @@ from olympoly.load_data import load_olympic_data
 
 
 def compute_group_features(df):
+    """Compute aggregate feature lookups for country strength, sport strength, and athlete experience.
+
+    Parameters:
+        df: DataFrame with 'Medal', 'NOC', 'Sport', and 'Name' columns.
+
+    Returns:
+        Dict with 'country_strength', 'athlete_exp', and 'sport_strength' Series.
+    """
     df = df.copy()
     df['is_gold'] = (df['Medal'] == 'Gold').astype(int)
 
@@ -69,6 +77,17 @@ class OlympicFeatureEngineer(BaseEstimator, TransformerMixin):
 
 
 def train_rf_model(df):
+    """Train a random forest classifier to predict gold medal outcomes.
+
+    Uses a pipeline with OlympicFeatureEngineer to prevent data leakage
+    by computing features only from training data.
+
+    Parameters:
+        df: DataFrame with Olympic athlete data.
+
+    Returns:
+        Tuple of (fitted pipeline, X_test, y_test, predicted probabilities).
+    """
     df = df.copy()
     df['is_gold'] = (df['Medal'] == 'Gold').astype(int)
 
@@ -145,6 +164,17 @@ def plot_sample_tree(pipeline):
 
 
 def predict_from_real_data(pipeline, noc, athlete_name, sport_name):
+    """Predict gold medal probability for a specific athlete using the trained pipeline.
+
+    Parameters:
+        pipeline: Fitted sklearn Pipeline.
+        noc: Country code (e.g., 'USA').
+        athlete_name: Athlete's name.
+        sport_name: Sport name.
+
+    Returns:
+        Float probability of winning gold.
+    """
     # Pipeline makes inference trivial. Just pass raw features in.
     X_input = pd.DataFrame([{
         "NOC": noc,
