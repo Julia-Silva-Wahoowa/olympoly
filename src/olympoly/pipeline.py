@@ -1,6 +1,6 @@
 import pandas as pd
 
-from olympoly.market_comparison import compare_market_vs_model
+from olympoly.olympics_betting.market_vs_model import compare_market_vs_model
 
 
 def run_market_model_comparison(
