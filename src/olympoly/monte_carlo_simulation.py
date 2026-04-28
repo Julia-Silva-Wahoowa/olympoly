@@ -131,7 +131,7 @@ def load_dataframe(csv_path: Optional[str] = None) -> pd.DataFrame:
 
     # Try repository loader
     try:
-        from load_data import load_data  # type: ignore
+        from olympoly.load_data import load_data  # type: ignore
         df = load_data()
         if not isinstance(df, pd.DataFrame):
             raise TypeError("load_data.load_data() did not return a pandas DataFrame")
@@ -256,7 +256,7 @@ def build_event_country_probs(df: pd.DataFrame, schema: Schema, bp: BuildParams)
         df["is_gold"] = pd.to_numeric(df[schema.rank_col], errors="coerce") == 1
     else:
         df["is_gold"] = False
-
+winners = df[df["is_gold"]].copy()
     if winners.empty:
         raise ValueError(
             "No gold/winner rows found. Check your --medal_col/--rank_col settings or dataset contents."
