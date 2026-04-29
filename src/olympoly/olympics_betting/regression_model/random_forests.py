@@ -11,6 +11,8 @@ from sklearn.pipeline import Pipeline
 
 from olympoly.load_data import load_olympic_data
 
+# maintain stability in Random Forest feature inputs
+# forgot to fix this file in a new branch :(
 
 def compute_group_features(df):
     """Compute aggregate feature lookups for country strength, sport strength, and athlete experience.
